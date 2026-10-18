@@ -12,8 +12,10 @@ def mean_squared_error(actual, predicted):
     return squared_errors.mean()
 
 
+
 def train(x, y, w, b, learning_rate, epochs):
     n = len(x)
+    loss_history = []
 
     for epoch in range(epochs):
         predictions = predict(x, w, b)
@@ -25,16 +27,19 @@ def train(x, y, w, b, learning_rate, epochs):
         w = w - learning_rate * dw
         b = b - learning_rate * db
 
+        mse = mean_squared_error(y, predict(x, w, b))
+        loss_history.append(mse)
+
         if (epoch + 1) % 100 == 0:
-            mse = mean_squared_error(y, predict(x, w, b))
             print(f"Epoch {epoch + 1}, MSE: {mse:.4f}")
 
-    return w, b
+    return w, b, loss_history
+
 
 hours = np.array([1, 2, 3, 4, 5], dtype=float)
 actual_marks = np.array([35, 40, 50, 55, 65], dtype=float)
 
-w, b = train(
+w, b, loss_history = train(
     hours,
     actual_marks,
     w=0.0,
@@ -59,5 +64,13 @@ plt.xlabel("Hours studied")
 plt.ylabel("Marks")
 plt.title("Linear Regression From Scratch")
 plt.legend()
+plt.grid(True)
+plt.show()
+
+plt.figure()
+plt.plot(range(1, len(loss_history) + 1), loss_history)
+plt.xlabel("Epoch")
+plt.ylabel("Mean Squared Error")
+plt.title("Training Loss Curve")
 plt.grid(True)
 plt.show()
