@@ -77,9 +77,17 @@ w, b, loss_history = train(
 print("\nTraining complete!")
 print("Learned weight:", w)
 print("Learned bias:", b)
-print("Final MSE:", mean_squared_error(actual_marks, predict(hours, w, b)))
+train_prediction = predict(x_train, w, b)
+train_mse = mean_squared_error(y_train, train_prediction)
+print("Training MSE:", train_mse)
+all_data_mse = mean_squared_error(
+    actual_marks,
+    predict(hours, w, b)
+)
+print("All-data MSE (training + test):", all_data_mse)
 predicted_marks = predict(hours, w, b)
-print("R-squared:", r_squared(actual_marks, predicted_marks))
+train_r2 = r_squared(y_train, train_prediction)
+print("Training R-squared:", train_r2)
 
 
 import matplotlib.pyplot as plt
@@ -89,15 +97,35 @@ predicted_marks = predict(hours, w, b)
 test_prediction = predict(x_test, w, b)
 test_mae = np.mean(np.abs(y_test - test_prediction))
 test_mean_error = np.mean(test_prediction - y_test)
+test_r2 = r_squared(y_test, test_prediction)
+print("Test R-squared:", test_r2)
 print("Test Mean Error:", test_mean_error)
 
 print("Test MAE:", test_mae)
+train_prediction = predict(x_train, w, b)
+
+
+train_mae = np.mean(np.abs(y_train - train_prediction))
+print("Training MAE:", train_mae)
 
 for i in range(len(y_test)):
     print(f"\nTest Student {i + 1}")
     print("Actual marks:", y_test[i])
     print("Predicted marks:", test_prediction[i])
     print("Absolute error:", abs(y_test[i] - test_prediction[i]))
+    # Compare training and test MAE
+plt.figure(figsize=(7, 5))
+
+labels = ["Training MAE", "Test MAE"]
+values = [train_mae, test_mae]
+
+bars = plt.bar(labels, values)
+plt.bar_label(bars, fmt="%.3f", padding=3)
+
+plt.title("Training vs Test Error")
+plt.ylabel("Mean Absolute Error (marks)")
+plt.tight_layout()
+plt.show()
 
 # Visualize actual vs predicted test marks
 # Visualize actual vs predicted test marks
@@ -129,6 +157,7 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 plt.bar_label(bars, fmt="%.2f", padding=3)
+
 
 plt.title("Actual vs Predicted Marks (Test Data)")
 plt.ylabel("Marks")
