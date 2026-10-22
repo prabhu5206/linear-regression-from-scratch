@@ -1,61 +1,14 @@
-
+from model import predict, mean_squared_error, r_squared, train
 import numpy as np
 
-
-def predict(x, w, b):
-    return w * x + b
-
-
-def mean_squared_error(actual, predicted):
-    errors = predicted - actual
-    squared_errors = errors ** 2
-    return squared_errors.mean()
-
-
-def r_squared(actual, predicted):
-    ss_res = np.sum((actual - predicted) ** 2)
-    ss_tot = np.sum((actual - actual.mean()) ** 2)
-
-    if ss_tot == 0:
-        return float("nan")
-
-    return 1 - (ss_res / ss_tot)
-
-
-
-
-def train(x, y, w, b, learning_rate, epochs):
-    n = len(x)
-    loss_history = []
-
-    for epoch in range(epochs):
-        predictions = predict(x, w, b)
-        errors = predictions - y
-
-        dw = (2 / n) * np.sum(x * errors)
-        db = (2 / n) * np.sum(errors)
-
-        w = w - learning_rate * dw
-        b = b - learning_rate * db
-
-        mse = mean_squared_error(y, predict(x, w, b))
-        loss_history.append(mse)
-
-        if (epoch + 1) % 100 == 0:
-            print(f"Epoch {epoch + 1}, MSE: {mse:.4f}")
-
-    return w, b, loss_history
-
-
-hours = np.array(
-    [1, 2, 3, 4, 5, 2.5, 3.5, 4.5, 5.5, 6],
-    dtype=float
+data = np.genfromtxt(
+    "student_data.csv",
+    delimiter=",",
+    names=True
 )
 
-actual_marks = np.array(
-    [35, 40, 50, 55, 65, 45, 52, 60, 68, 75],
-    dtype=float
-)
+hours = data["hours"]
+actual_marks = data["marks"]
 
 # First 7 students for training
 x_train = hours[:7]
@@ -119,6 +72,9 @@ plt.figure(figsize=(7, 5))
 labels = ["Training MAE", "Test MAE"]
 values = [train_mae, test_mae]
 
+print("Actual test marks:", y_test)
+print("Predicted test marks:", test_prediction)
+print("Number of test students:", len(y_test))
 bars = plt.bar(labels, values)
 plt.bar_label(bars, fmt="%.3f", padding=3)
 
@@ -127,26 +83,13 @@ plt.ylabel("Mean Absolute Error (marks)")
 plt.tight_layout()
 plt.show()
 
-# Visualize actual vs predicted test marks
-# Visualize actual vs predicted test marks
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(7, 5))
 
 students = np.arange(len(y_test))
-width = 0.3
+width = 0.35
 
-plt.bar(
-    students - width * 0.7,
-    y_test,
-    width,
-    label="Actual Marks"
-)
-
-plt.bar(
-    students + width *0.7,
-    test_prediction,
-    width,
-    label="Predicted Marks"
-)
+plt.bar(students - width / 2, y_test, width, label="Actual Marks")
+plt.bar(students + width / 2, test_prediction, width, label="Predicted Marks")
 
 plt.title("Actual vs Predicted Marks (Test Data)")
 plt.xlabel("Test Student")
@@ -156,9 +99,6 @@ plt.ylim(0, 100)
 plt.legend()
 plt.tight_layout()
 plt.show()
-plt.bar_label(bars, fmt="%.2f", padding=3)
-
-
 plt.title("Actual vs Predicted Marks (Test Data)")
 plt.ylabel("Marks")
 plt.ylim(0, 100)
@@ -186,8 +126,14 @@ plt.show()
 
 
 # Predict marks for a new number of study hours
-new_hours = float(input("Enter study hours: "))
+try:
+    new_hours = float(input("Enter study hours: "))
 
-predicted_new_marks = predict(new_hours, w, b)
+    if new_hours < 0:
+        print("Study hours cannot be negative.")
+    else:
+        predicted_new_marks = predict(new_hours, w, b)
+        print(f"Predicted marks: {predicted_new_marks:.2f}")
 
-print(f"Predicted marks: {predicted_new_marks:.2f}")
+except ValueError:
+    print("Invalid input! Please enter a number.")
